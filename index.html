@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datos de COVID-19</title>
+</head>
+<body>
+
+    <canvas id="chart" width="800" height="400"></canvas>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+
+    <script type="module">
+        //import data from './data.js'
+        import { getTotalCasesByDate } from './confirmed.js'
+        import { getTotalCasesByDate1 } from './deaths.js'
+        import { getTotalCasesByDate2 } from './recovered.js'
+
+        function totalCases(data,data1,data2,ctx){
+
+            const { confirmed, deaths, recovered} = data
+
+            let chart = new Chart(ctx, {
+                //tipo de grafico
+            type: 'line',
+            
+            data: {
+                //valores en X
+                labels: confirmed.map(item => new Intl.DateTimeFormat('es-ES',{ month:'long', day:'numeric' }).format(new Date(item.date))), //map returna array. usando api de navegador
+                datasets: [
+                    {
+                        //valores en Y
+                        label: 'Muertes',
+                        borderColor: '#E10B0B',
+                        data:data1.deaths.map(item => item.cases)
+                    },
+                    {
+                        //valores en Y
+                        label: 'Confirmados',
+                        borderColor: '#FFD433',
+                        data:confirmed.map(item => item.cases)
+                    },
+                    {
+                        //valores en Y
+                        label: 'Recuperados',
+                        borderColor: '#03A90D',
+                        data:data2.recovered.map(item => item.cases)
+                    }
+                ]
+            },
+
+            options: {
+                scales:{
+                    xAxes:[{
+                        gridLines: {
+                            display:false
+                        }
+                    }]
+                },
+                title:{
+                    display:true,
+                    text:'Casos COVID-19',
+                    fontSize:30,
+                    padding: 30,
+                    fontColor: 'black'
+                },
+                legend: {
+                position: 'bottom',
+                labels:{
+                    padding:20,
+                    boxWidth:20,
+                    fontColor:'black'
+
+                    }
+                },
+                layout:{
+                    padding:50
+                },
+                tooltips:{
+                    backgroundColor: '#0584f6',
+                    titleFontSize: 15,
+                    xPadding: 15,
+                    yPadding: 15,
+                    bodyFontSize: 12,
+                    mode: 'x',
+                },
+                elements:{
+                    line: {
+                        borderWidth: 3,
+                        fill: false
+                    },
+                    point:{
+                    radius: 5,
+                    borderWidth: 1,
+                    hoverRadius: 8,
+                    hoverBorderWidth:2
+                }
+                },
+            },
+
+        });
+        }
+
+        async function render() {
+            let ctx = document.getElementById('chart').getContext('2d');
+            let data = await getTotalCasesByDate()
+            let data1 = await getTotalCasesByDate1()
+            let data2 = await getTotalCasesByDate2()
+
+            totalCases(data,data1,data2,ctx)
+        }
+        render()
+        </script>
+
+</body>
+</html>
